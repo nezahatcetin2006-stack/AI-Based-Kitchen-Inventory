@@ -12,6 +12,10 @@ Kullanıcılar ürünleri manuel veya fotoğrafla ekleyebilir, son kullanıma ya
 - Ürün silme
 - AI Şef: envanterde özellikle tarihi yakın ürünleri önceliklendirerek tarif önerme
 
+## Canlı Demo
+Yayın Linki:https://smart-pantry-pal-57.lovable.app
+Canlı Demo:
+
 ## Teknoloji Yığını
 
 - Frontend: Next.js (TypeScript, Tailwind CSS)
@@ -19,7 +23,7 @@ Kullanıcılar ürünleri manuel veya fotoğrafla ekleyebilir, son kullanıma ya
 - Veritabanı: PostgreSQL
 - AI: Groq (`llama-3.2-11b-vision-preview`)
 
-## Kurulum
+## Nasıl Çalıştırılır?
 
 ### 1) Veritabanı (Opsiyonel Docker)
 
