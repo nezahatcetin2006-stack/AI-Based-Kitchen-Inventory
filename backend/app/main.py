@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.products import router as products_router
 from app.api.ai_entry import router as ai_entry_router
+from app.api.recipes import router as recipes_router
 from app.config import settings
 from app.db import Base, engine, SessionLocal
 from app.seed import seed_demo_products
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
     # 2. AI Analiz rotası (/products/ai-entry)
     # ai_entry_router içinde @router.post("/ai-entry") olduğu için başına /products ekliyoruz.
     application.include_router(ai_entry_router, prefix="/products", tags=["AI"])
+    application.include_router(recipes_router, prefix="/recipes", tags=["Recipes"])
 
     @application.on_event("startup")
     def on_startup() -> None:

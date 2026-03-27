@@ -28,3 +28,17 @@ export type AiEntryPreview = {
   confidence: number;
 };
 
+export type RecipeSuggestion = {
+  recipeTitle: string;
+  ingredients: string[];
+  steps: string[];
+  servings?: number | null;
+  calories?: number | null;
+  focusProducts: string[];
+  note: string;
+};
+
+export type RecipeSuggestionResponse = {
+  recipes: RecipeSuggestion[];
+};
+

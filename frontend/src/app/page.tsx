@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AddProductForm from "@/components/AddProductForm";
 import AiEntryUpload from "@/components/AiEntryUpload";
 import ProductList from "@/components/ProductList";
+import RecipeSuggestionPanel from "@/components/RecipeSuggestionPanel";
 import type { Product } from "@/lib/types";
 import { fetchProducts } from "@/lib/api";
 
@@ -40,6 +41,7 @@ export default function HomePage() {
       <section className="space-y-3">
         <AddProductForm onAdded={load} />
         <AiEntryUpload onAdded={load} />
+        <RecipeSuggestionPanel />
         <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600">
           Manuel ekleme: `kalan tahmini gün` ve `saklama tavsiyesi` AI tarafından otomatik doldurulur.
         </div>

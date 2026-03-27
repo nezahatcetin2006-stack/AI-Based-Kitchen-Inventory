@@ -1,4 +1,4 @@
-import type { AiEntryPreview, Product, ProductCreate } from "./types";
+import type { AiEntryPreview, Product, ProductCreate, RecipeSuggestionResponse } from "./types";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "http://localhost:8000";
@@ -58,5 +58,19 @@ export async function analyzeProductImage(file: File): Promise<AiEntryPreview> {
   }
 
   return (await res.json()) as AiEntryPreview;
+}
+
+export async function getRecipeSuggestions(): Promise<RecipeSuggestionResponse> {
+  const res = await fetch(`${API_BASE_URL}/recipes/ai-chef`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Tarif önerisi alınamadı (${res.status}): ${text || "Hata"}`);
+  }
+
+  return (await res.json()) as RecipeSuggestionResponse;
 }
 

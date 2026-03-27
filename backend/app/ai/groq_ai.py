@@ -8,6 +8,7 @@ from groq import Groq
 
 from app.config import settings
 from app.schemas.ai_entry import AiEntryPreview
+from app.schemas.recipe import RecipeSuggestion, RecipeSuggestionResponse
 
 
 def _extract_json_object(text: str) -> Any:
@@ -226,4 +227,76 @@ async def analyze_product_text(*, product_name: str, quantity: float, unit: str)
         return AiEntryPreview.model_validate(parsed)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Groq JSON parse edilemedi: {e}") from e
+
+
+async def generate_recipe_suggestions_from_inventory(
+    *,
+    inventory_rows: list[dict[str, Any]],
+) -> RecipeSuggestionResponse:
+    """
+    Envanter girdisine göre (özellikle günü az kalan ürünleri öncelikleyerek) tarif önerileri üretir.
+    """
+    if not settings.GROQ_API_KEY:
+        raise HTTPException(status_code=503, detail="Groq API anahtarı tanımlı değil (`GROQ_API_KEY`).")
+
+    if not inventory_rows:
+        return RecipeSuggestionResponse(
+            recipes=[
+                RecipeSuggestion(
+                    recipeTitle="Envanter Boş",
+                    ingredients=[],
+                    steps=["Önce envantere birkaç ürün ekleyin, sonra tekrar tarif önerisi alın."],
+                    note="Tarif üretmek için envanterde ürün olmalı.",
+                )
+            ]
+        )
+
+    inv_json = json.dumps(inventory_rows, ensure_ascii=False)
+    prompt = (
+        "Sen bir mutfak asistanısın. Verilen envantere göre kullanımı kolay tarif önerileri üret.\n"
+        "ÖNCELİK: daysRemaining değeri düşük olan ürünleri önce değerlendir.\n"
+        "Sadece JSON döndür. Ek açıklama yazma.\n"
+        "JSON şeması:\n"
+        "{\n"
+        '  "recipes": [\n'
+        "    {\n"
+        '      "recipeTitle": "string",\n'
+        '      "ingredients": ["string"],\n'
+        '      "steps": ["string"],\n'
+        '      "servings": number | null,\n'
+        '      "calories": number | null,\n'
+        '      "focusProducts": ["string"],\n'
+        '      "note": "string"\n'
+        "    }\n"
+        "  ]\n"
+        "}\n\n"
+        "Kurallar:\n"
+        "- 1 ile 3 arası tarif öner.\n"
+        "- focusProducts alanına özellikle tarihi yakın ürünleri koy.\n"
+        "- Tarifler pratik ve gerçek hayatta uygulanabilir olsun.\n"
+        "- Dil Türkçe olsun.\n\n"
+        f"Envanter: {inv_json}"
+    )
+
+    client = Groq(api_key=settings.GROQ_API_KEY)
+    completion = await asyncio.to_thread(
+        client.chat.completions.create,
+        model=settings.GROQ_MODEL,
+        messages=[{"role": "user", "content": [{"type": "text", "text": prompt}]}],
+        temperature=0.4,
+        max_completion_tokens=1200,
+        stream=False,
+    )
+
+    raw_text = completion.choices[0].message.content if completion.choices else ""
+    if not raw_text or not raw_text.strip():
+        raise HTTPException(status_code=502, detail="Groq tarif önerisi için boş yanıt döndürdü.")
+
+    try:
+        parsed = _extract_json_object(raw_text)
+        if not isinstance(parsed, dict):
+            raise ValueError("JSON object değil")
+        return RecipeSuggestionResponse.model_validate(parsed)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Groq tarif JSON parse edilemedi: {e}") from e
 
