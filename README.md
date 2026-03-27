@@ -1,48 +1,49 @@
-# AI Based Kitchen Inventory - READ
+# Smart Pantry Pal
 
-Bu proje, mutfak envanterini takip etmenizi ve ürünleri iki farklı şekilde eklemenizi sağlar:
-- Manuel ekleme: kullanıcı `ürün adı + miktar + birim` girer, kalan gün/saklama tavsiyesi AI ile otomatik tamamlanır.
-- Fotoğraftan ekleme: görsel analiz ile ürün bilgileri önerilir ve onayla listeye eklenir.
+AI destekli mutfak envanter uygulaması.
+Kullanıcılar ürünleri manuel veya fotoğrafla ekleyebilir, son kullanıma yaklaşan ürünleri takip edebilir ve envanteri kullanarak AI tarif önerileri alabilir.
 
-## Teknoloji
-- Frontend: Next.js (TypeScript, Tailwind)
+## Özellikler
+
+- Envanter ürünlerini listeleme
+- Manuel ürün ekleme (sadece ürün adı, miktar, birim)
+- Fotoğraftan ürün tanıma ve onayla ekleme
+- Son kullanıma yaklaşan ürünleri görsel olarak vurgulama
+- Ürün silme
+- AI Şef: envanterde özellikle tarihi yakın ürünleri önceliklendirerek tarif önerme
+
+## Teknoloji Yığını
+
+- Frontend: Next.js (TypeScript, Tailwind CSS)
 - Backend: FastAPI + SQLAlchemy
 - Veritabanı: PostgreSQL
-- AI: Groq Vision (`llama-3.2-11b-vision-preview`)
-
-## Proje yapısı
-- `frontend/` - kullanıcı arayüzü
-- `backend/` - API ve AI iş mantığı
-- `docs/` - ek dokümantasyon
-
-## Gereksinimler
-- Node.js 18+
-- Python 3.10+
-- PostgreSQL (veya Docker)
+- AI: Groq (`llama-3.2-11b-vision-preview`)
 
 ## Kurulum
 
-### 1) Veritabanı (opsiyonel Docker ile)
-Kök dizinde:
+### 1) Veritabanı (Opsiyonel Docker)
+
+Proje kökünde:
 
 ```bash
 docker compose up -d
 ```
 
 ### 2) Backend
-`backend/.env` dosyasını aşağıdaki örneğe göre doldurun:
+
+`backend/.env` dosyası:
 
 ```env
 PORT=8000
 DATABASE_URL=postgresql+psycopg2://inventory:inventory@localhost:5432/kitchen_inventory
 CORS_ORIGINS=http://localhost:3000,http://localhost:3001
 SEED_DEMO=1
-GROQ_API_KEY=YOUR_GROQ_KEY
+GROQ_API_KEY=YOUR_GROQ_API_KEY
 GROQ_MODEL=llama-3.2-11b-vision-preview
 VISION_MAX_IMAGE_BYTES=4194304
 ```
 
-Ardından:
+Backend'i çalıştır:
 
 ```bash
 cd backend
@@ -51,13 +52,14 @@ py -m uvicorn app.main:app --reload --port 8000
 ```
 
 ### 3) Frontend
-`frontend/.env.local` dosyasını oluşturun:
+
+`frontend/.env.local`:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
-Ardından:
+Frontend'i çalıştır:
 
 ```bash
 cd frontend
@@ -65,18 +67,28 @@ npm install
 npm run dev
 ```
 
-## API uç noktaları
-- `GET /products` - ürünleri listeler
-- `POST /products` - manuel ürün ekler
-- `DELETE /products/{id}` - ürün siler
-- `POST /products/ai-entry` - fotoğraftan AI önizleme üretir
+## API Uç Noktaları
 
-## Kısa test
-1. Frontend açıldığında ürün listesi görünmeli.
-2. Manuel ürün eklemede sadece 3 alan görünmeli: ad, miktar, birim.
-3. Ürün eklendikten sonra kalan gün ve saklama tavsiyesi AI ile dolu gelmeli.
-4. Bir ürünün `Sil` butonu çalışmalı.
+### Products
+- `GET /products` - ürünleri listeler
+- `POST /products` - manuel ürün ekler (kalan gün/saklama tavsiyesi AI ile tamamlanır)
+- `DELETE /products/{id}` - ürün siler
+
+### AI Entry
+- `POST /products/ai-entry` - fotoğraftan ürün önizlemesi üretir
+
+### AI Şef
+- `POST /recipes/ai-chef` - envanteri kullanarak tarif önerisi üretir (tarihi yakın ürünleri önceliklendirir)
+
+## Kısa Doğrulama
+
+1. Envanter listesi açılıyor mu kontrol et.
+2. Manuel ürün eklemede yalnızca 3 alan (ad, miktar, birim) görünüyor mu kontrol et.
+3. Fotoğraftan ürün ekleme akışı çalışıyor mu kontrol et.
+4. `Tarif Önerisi Al` butonu tarif döndürüyor mu kontrol et.
+5. Ürün silme butonu çalışıyor mu kontrol et.
 
 ## Notlar
-- Eğer `DELETE /products/{id}` 404 alırsanız backend'i yeniden başlatın.
-- Birden fazla `uvicorn` süreci çalışıyorsa port çakışması/yanlış rota davranışı olabilir.
+
+- `DELETE /products/{id}` için 404 alırsan backend'i yeniden başlat.
+- Aynı anda birden fazla uvicorn süreci çalışırsa rota davranışı karışabilir; tek backend süreciyle devam et.
