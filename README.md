@@ -14,7 +14,7 @@ Kullanıcılar ürünleri manuel veya fotoğrafla ekleyebilir, son kullanıma ya
 
 ## Canlı Demo
 Yayın Linki:https://smart-pantry-pal-57.lovable.app
-Canlı Demo:
+Canlı Demo:https://www.loom.com/share/c1e67d13a8b340748855dd68318d1b4c
 
 ## Teknoloji Yığını
 
